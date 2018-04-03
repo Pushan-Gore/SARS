@@ -1,4 +1,5 @@
-import re, math, collections, itertools, os, sys
+import re, math, collections, itertools, os, sys, json, pickle
+import html_helper
 import nltk
 import nltk.classify.util
 import nltk.metrics
@@ -11,54 +12,29 @@ import tweepy
 from tweepy import OAuthHandler
 from textblob import TextBlob
 
-POLARITY_DATA_DIR = os.path.join('polarityData', 'rt-polaritydata')
-RT_POLARITY_POS_FILE = os.path.join(POLARITY_DATA_DIR, 'rt-polarity-pos.txt')
-RT_POLARITY_NEG_FILE = os.path.join(POLARITY_DATA_DIR, 'rt-polarity-neg.txt')
-
-#this function takes a feature selection mechanism and returns its performance in a variety of metrics
-def evaluate_features():
-    posFeatures = []
-    negFeatures = []
-
-    #breaks up the sentences into lists of individual words (as selected by the input mechanism) and appends 'pos' or 'neg' after each list
-    train_pos = []
-    train_neg = []
-    with open(RT_POLARITY_POS_FILE, 'r') as posSentences:
-        for i in posSentences:
-            train_pos.append((i, 'pos'))
-
-        all_words = set(word.lower() for passage in train_pos for word in word_tokenize(passage[0]))
-        print "Extracted all positive words..."
-        posFeatures = [[{word: (word in word_tokenize(x[0])) for word in all_words}, x[1]] for x in train_pos]
-        print "Prepared positive word feature set..."
-    with open(RT_POLARITY_NEG_FILE, 'r') as negSentences:
-        for i in negSentences:
-            train_neg.append((i, 'neg'))
-
-        all_words = set(word.lower() for passage in train_neg for word in word_tokenize(passage[0]))
-        print "Extracted all negative words..."
-        negFeatures = [[{word: (word in word_tokenize(x[0])) for word in all_words}, x[1]] for x in train_neg]
-        print "Prepared negative word feature set..."
-
-    trainFeatures = posFeatures[:] + negFeatures[:]
-
-    #trains a Naive Bayes Classifier
-    classifier = NaiveBayesClassifier.train(trainFeatures)
-
-    #prints metrics to show how well the feature selection did
-    classifier.show_most_informative_features(10)
-    return classifier
+CLASSIFIER_FILE = os.path.join('data', 'naive_bayes_classifier.pickle')
 
 class TwitterClient(object):
     #Generic Twitter Class for sentiment analysis.
     def __init__(self):
         # Pushan Gore Twitter account// Change these keys for different account
+
         consumer_key="sG4mFIbzlMH3gs3nWSTHyjpNN"
         consumer_secret="mG1kv6J6z3zTJeaQEl5T6qtm3av90D2adXneoKha5b2Wr5Z8ao"
         access_token="700610683033907200-1jCFP0qrFw4y8cuWrc5O6XBfVLgx5LS"
         access_token_secret="JkTv6cXq56hnkGjxwxlwplFB3ZKGx4afmilddKSemGj2F"
 
-        self.classifier = evaluate_features()
+        classifier_file = open(CLASSIFIER_FILE, 'r')
+
+        #load the unpickle object into a variable
+        self.classifier = pickle.load(classifier_file)
+        self.html = html_helper.HTMLHelper()
+
+        self.results = {}
+        self.neut_count = [0] * 200
+        self.pos_count = [0] * 200
+        self.neg_count = [0] * 200
+
         # Try catch, statement to make an attempt at Auth
         try:
             self.auth = OAuthHandler(consumer_key, consumer_secret)
@@ -66,6 +42,8 @@ class TwitterClient(object):
             self.api = tweepy.API(self.auth)
         except:
             print("Error: Authentication Failed")
+
+        print("Authentication Success")
 
     def clean_tweet(self, tweet):
         return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) \
@@ -86,7 +64,7 @@ class TwitterClient(object):
         try:
             fetched_tweets = self.api.search(q = query, count = count)
 
-            for tweet in fetched_tweets:
+            for i, tweet in enumerate(fetched_tweets):
                 parsed_tweet = {}
                 parsed_tweet['text'] = tweet.text
                 words = re.findall(r"[\w']+|[.,!?;]", tweet.text.rstrip())
@@ -99,10 +77,22 @@ class TwitterClient(object):
                 else:
                     tweets.append(parsed_tweet)
 
+                if(parsed_tweet['sentiment'] == 'positive' or parsed_tweet['sentiment'] == 'pos'):
+                    self.pos_count[i] += 1
+                elif(parsed_tweet['sentiment'] == 'negative' or parsed_tweet['sentiment'] == 'neg'):
+                    self.neg_count[i] += 1
+                else:
+                    self.neut_count[i] += 1
+                #self.results[i] = {'text': parsed_tweet['text'], 'tweet': tweet , 'label': parsed_tweet['sentiment']}
+
             return tweets
 
         except tweepy.TweepError as e:
             print("Error : " + str(e))
+
+    def getHTML(self, keyword, results, time, pos_count, neg_count, neut_count):
+        return self.html.getResultHTML(keyword, self.results, time, self.pos_count, \
+                self.neg_count, self.neut_count)
 
 def main():
     api = TwitterClient()
@@ -114,9 +104,9 @@ def main():
     tweets = api.get_tweets(query = query_input, count = 200)
 
     # Need to check this, recode this ###SOMETHING IS WRONG HERE###
-    if tweets == 0:
+    if not tweets:
         print "Error Mining for tweets or query is beyond scope"
-        abort()
+        exit()
 
     ptweets = [tweet for tweet in tweets if (tweet['sentiment'] == 'positive' or tweet['sentiment'] == 'pos')]
     print("Positive tweets percentage: {} %".format(100*len(ptweets)/len(tweets)))
