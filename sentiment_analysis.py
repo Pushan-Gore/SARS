@@ -31,9 +31,9 @@ class TwitterClient(object):
         self.html = html_helper.HTMLHelper()
 
         self.results = {}
-        self.neut_count = [0] * 200
-        self.pos_count = [0] * 200
-        self.neg_count = [0] * 200
+        self.neut_count = 0
+        self.pos_count = 0
+        self.neg_count = 0
 
         # Try catch, statement to make an attempt at Auth
         try:
@@ -78,11 +78,14 @@ class TwitterClient(object):
                     tweets.append(parsed_tweet)
 
                 if(parsed_tweet['sentiment'] == 'positive' or parsed_tweet['sentiment'] == 'pos'):
-                    self.pos_count[i] += 1
+                    #self.pos_count[i] += 1
+                    self.pos_count += 1
                 elif(parsed_tweet['sentiment'] == 'negative' or parsed_tweet['sentiment'] == 'neg'):
-                    self.neg_count[i] += 1
+                    #self.neg_count[i] += 1
+                    self.neg_count += 1
                 else:
-                    self.neut_count[i] += 1
+                    #self.neut_count[i] += 1
+                    self.neut_count += 1
                 #self.results[i] = {'text': parsed_tweet['text'], 'tweet': tweet , 'label': parsed_tweet['sentiment']}
 
             return tweets
@@ -90,8 +93,8 @@ class TwitterClient(object):
         except tweepy.TweepError as e:
             print("Error : " + str(e))
 
-    def getHTML(self, keyword, results, time, pos_count, neg_count, neut_count):
-        return self.html.getResultHTML(keyword, self.results, time, self.pos_count, \
+    def getHTML(self, keyword, results, pos_count, neg_count, neut_count):
+        return self.html.getResultHTML(keyword, self.results, self.pos_count, \
                 self.neg_count, self.neut_count)
 
 def main():
