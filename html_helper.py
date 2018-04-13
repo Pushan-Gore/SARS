@@ -28,13 +28,22 @@ class HTMLHelper:
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style>
+pre {
+    background: white;
+    font-family: monospace;
+    white-space: pre;
+    margin: 1em 0;
+    padding: 20px;
+}
+</style>
 </head>
 <body>
 
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
-        <a class="navbar-brand" href="#">Sentiment Analysis</a>
+        <a class="navbar-brand">Sentiment Analysis</a>
     </div>
     <form class="navbar-form navbar-right" name="keyform" method="get" onSubmit="return checkEmpty(this);">
         <div class="input-group">
@@ -50,6 +59,7 @@ class HTMLHelper:
 </nav>
 
 <div class="container">
+    <div class="media">
     </br>
     <h2>About the Project</h2>
     <h3>
@@ -62,6 +72,34 @@ class HTMLHelper:
     <h3>
         <p> Enter the movie in the search bar and press enter </p>
     </h3>
+    <br><hr><br>
+    <div class="media-body">
+        <u><h2 class="media-heading">Naive Bayes Classifiers</h2></u>
+<pre>
+A classifier based on the Naive Bayes algorithm. In order to find the <br>
+probability for a label, this algorithm first uses the Bayes rule to <br>
+express P(label|features) in terms of P(label) and P(features|label): <br>
+<br>
+                       P(label) * P(features|label)                <br>
+  P(label|features) = ------------------------------               <br>
+                              P(features)                          <br>
+<br>
+The algorithm then makes the 'naive' assumption that all features are<br>
+independent, given the label:<br>
+<br>
+                       P(label) * P(f1|label) * ... * P(fn|label)<br>
+  P(label|features) = --------------------------------------------<br>
+                                         P(features)<br>
+<br>
+Rather than computing P(features) explicitly, the algorithm just<br>
+calculates the numerator for each label, and normalizes them so they<br>
+sum to one:<br>
+<br>
+                       P(label) * P(f1|label) * ... * P(fn|label)<br>
+  P(label|features) = --------------------------------------------<br>
+                        SUM[l]( P(l) * P(f1|l) * ... * P(fn|l) )<br>
+</pre>
+
 </div>
 
     <script type="text/javascript">
@@ -109,7 +147,7 @@ class HTMLHelper:
 <nav class="navbar navbar-inverse">
   <div class="container-fluid">
     <div class="navbar-header">
-        <a class="navbar-brand" href="#">Sentiment Analysis</a>
+        <a class="navbar-brand">Sentiment Analysis</a>
     </div>
     <form class="navbar-form navbar-right" name="keyform" method="get" onSubmit="return checkEmpty(this);">
         <div class="input-group">
@@ -127,12 +165,6 @@ class HTMLHelper:
 <div class="media" id="result-chart" style="width: 600px; height: 450px; float:right; margin:0 20px 20px 0;"></div>
 
 <div class="container">
-    <div class="media">
-        <div class="media-body">
-            <h4 class="media-heading"></h4>
-            <p></p>
-        </div>
-    </div>
 <hr>
 
 
