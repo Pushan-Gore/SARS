@@ -129,7 +129,7 @@ sum to one:<br>
     #end
 
     #start getResultHTML
-    def getResultHTML(self, keyword, results, pos_count, neg_count, neut_count, tweets):
+    def getResultHTML(self, keyword, results, pos_count, neg_count, neut_count, tweets, frequency_list):
         print("Fetched Result web page")
         keyword = urllib.unquote(keyword.replace("+", " "))
         html = '''
@@ -141,6 +141,21 @@ sum to one:<br>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
+    <script src="static/cloud.js"></script>
+<style>
+    .legend {
+        border: 1px solid #555555;
+        border-radius: 5px 5px 5px 5px;
+        font-size: 0.8em;
+        margin: 10px;
+        padding: 8px;
+    }
+    .bld {
+        font-weight: bold;
+    }
+</style>
 </head>
 <body>
 
@@ -161,15 +176,75 @@ sum to one:<br>
     </form>
   </div>
 </nav>
+'''
 
+        html += '''
+        <div class="media" id="chart"></div>
+        <script>
+        var frequency_list =
+        '''
+
+        html += str(frequency_list)
+        html += ''';'''
+
+        html += '''
+      drawWordCloud(frequency_list);
+
+      function drawWordCloud(frequency_list){
+            var svg_location = "#chart";
+            var width = $(document).width();
+            var height = $(document).height();
+
+            var fill = d3.scale.category20();
+
+            var word_entries = d3.entries(frequency_list);
+
+            var xScale = d3.scale.linear()
+                .domain([0, d3.max(word_entries, function(d) {
+                return d.value;
+                })
+                ])
+                .range([10,100]);
+
+            d3.layout.cloud().size([width, height])
+                .timeInterval(20)
+                .words(word_entries)
+                .fontSize(function(d) { return xScale(+d.value); })
+                .text(function(d) { return d.key; })
+                .rotate(function() { return ~~(Math.random() * 2) * 90; })
+                .font("Impact")
+                .on("end", draw)
+                .start();
+
+            function draw(words) {
+                d3.select(svg_location).append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(" + [width >> 1, height >> 1] + ")")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return xScale(d.value) + "px"; })
+                .style("font-family", "Impact")
+                .style("fill", function(d, i) { return fill(i); })
+                .attr("text-anchor", "middle")
+                .attr("transform", function(d) {
+                return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.key; });
+            }
+
+            d3.layout.cloud().stop();
+        }
+        </script>
+        '''
+
+        html += '''
 <div class="media" id="result-chart" style="width: 600px; height: 450px; float:right; margin:0 20px 20px 0;"></div>
 
 <div class="container">
 <hr>
-
-
-'''
-        html += '''
         <div class="media-body">
         '''
         #Printing tweets here
@@ -248,6 +323,8 @@ sum to one:<br>
         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
+        '''
+        html += '''
     </script>
 </body>
 </html>

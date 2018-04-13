@@ -11,6 +11,7 @@ from nltk.probability import FreqDist, ConditionalFreqDist
 import tweepy
 from tweepy import OAuthHandler
 from textblob import TextBlob
+from collections import Counter
 
 CLASSIFIER_FILE = os.path.join('data', 'naive_bayes_classifier.pickle')
 
@@ -34,6 +35,11 @@ class TwitterClient(object):
         self.neut_count = 0
         self.pos_count = 0
         self.neg_count = 0
+        self.bag_of_words = []
+        self.frequency_list = {}
+        self.exclude_list = ['.', 'RT', ',', 'a', 'the', 'The', 'A', 'co',\
+                'in', 'of', 't', 'https', 'http', 'to', 'it', '!', 'this', '?',\
+                'by', 'at', 'I']
 
         # Try catch, statement to make an attempt at Auth
         try:
@@ -68,6 +74,9 @@ class TwitterClient(object):
                 parsed_tweet = {}
                 parsed_tweet['text'] = self.clean_tweet(tweet.text)
                 words = re.findall(r"[\w']+|[.,!?;]", tweet.text.rstrip())
+                for word in words:
+                    if word not in self.exclude_list:
+                        self.bag_of_words.append(word)
                 parsed_tweet['sentiment'] = self.classifier.classify(dict([(word, True) for word in words]))
                 #get_tweet_sentiment(tweet.text)
 
@@ -93,9 +102,14 @@ class TwitterClient(object):
         except tweepy.TweepError as e:
             print("Error : " + str(e))
 
-    def getHTML(self, keyword, results, pos_count, neg_count, neut_count, tweets):
+    def get_frequency_list(self):
+        counts_list = Counter(self.bag_of_words).most_common()
+        for item in counts_list:
+            self.frequency_list[str(item[0])] = int(item[1])
+
+    def getHTML(self, keyword, results, pos_count, neg_count, neut_count, tweets, frequency_list):
         return self.html.getResultHTML(keyword, self.results, self.pos_count, \
-                self.neg_count, self.neut_count, tweets)
+                self.neg_count, self.neut_count, tweets, frequency_list)
 
 def main():
     api = TwitterClient()
@@ -128,6 +142,9 @@ def main():
     print("\n\nNegative tweets:")
     for tweet in ntweets[:10]:
         print(tweet['text'])
+
+    api.get_frequency_list()
+    print api.frequency_list
 
 if __name__ == "__main__":
     main()

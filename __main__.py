@@ -32,7 +32,8 @@ class index:
                 ptweets = [tweet for tweet in tweets if (tweet['sentiment'] == 'positive' or tweet['sentiment'] == 'pos')]
                 ntweets = [tweet for tweet in tweets if (tweet['sentiment'] == 'negative' or tweet['sentiment'] == 'neg')]
                 neut_count = 100*(len(tweets) - len(ntweets) - len(ptweets))/len(tweets)
-                return twitter_api.getHTML(keyword, results, len(ptweets), len(ntweets), neut_count, tweets)
+                twitter_api.get_frequency_list()
+                return twitter_api.getHTML(keyword, results, len(ptweets), len(ntweets), neut_count, tweets, twitter_api.frequency_list)
         else:
             return html.getDefaultHTML()
 
