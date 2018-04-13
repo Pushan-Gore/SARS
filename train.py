@@ -43,6 +43,7 @@ def train_set():
     trainFeatures = posFeatures[:] + negFeatures[:]
 
     #trains a Naive Bayes Classifier
+    print trainFeatures
     classifier = NaiveBayesClassifier.train(trainFeatures)
 
     #Dump the classifier to a pickle file
@@ -51,7 +52,7 @@ def train_set():
     naive_bayes_classifier_file.close()
 
     #prints metrics to show how well the feature selection did
-    #classifier.show_most_informative_features(10)
+    classifier.show_most_informative_features(10)
 
 if __name__ == "__main__":
     train_set()

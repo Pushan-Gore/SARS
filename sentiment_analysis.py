@@ -58,15 +58,15 @@ class TwitterClient(object):
         else:
             return 'negative'
 
-    def get_tweets(self, query, count = 10):
+    def get_tweets(self, query, count = 200):
         tweets = []
 
         try:
-            fetched_tweets = self.api.search(q = query, count = count)
+            fetched_tweets = self.api.search(q = query, count = count, lang = 'en')
 
             for i, tweet in enumerate(fetched_tweets):
                 parsed_tweet = {}
-                parsed_tweet['text'] = tweet.text
+                parsed_tweet['text'] = self.clean_tweet(tweet.text)
                 words = re.findall(r"[\w']+|[.,!?;]", tweet.text.rstrip())
                 parsed_tweet['sentiment'] = self.classifier.classify(dict([(word, True) for word in words]))
                 #get_tweet_sentiment(tweet.text)
@@ -93,9 +93,9 @@ class TwitterClient(object):
         except tweepy.TweepError as e:
             print("Error : " + str(e))
 
-    def getHTML(self, keyword, results, pos_count, neg_count, neut_count):
+    def getHTML(self, keyword, results, pos_count, neg_count, neut_count, tweets):
         return self.html.getResultHTML(keyword, self.results, self.pos_count, \
-                self.neg_count, self.neut_count)
+                self.neg_count, self.neut_count, tweets)
 
 def main():
     api = TwitterClient()

@@ -20,27 +20,50 @@ class HTMLHelper:
     #start getDefaultHTML
     def getDefaultHTML(self, error = 0):
         html = '''
-<html>
-<head><title>SARS</title>
-    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.4.1/build/cssgrids/grids-min.css" />
-    <link rel="stylesheet" type="text/css" href="static/styles.css" />
+<html lang="en">
+<head>
+    <title>SARS</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <div class="yui3-g" id="doc">
-    <div class="yui3-u" id="hd">
-        <h2> Sentiment Analysis </h2>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="#">Sentiment Analysis</a>
     </div>
-    <div class="yui3-u" id="bd">
-        <form name="keyform" id="key-form" method="get" onSubmit="return checkEmpty(this);">
-        <p><input type="text" value="" name="keyword" id="keyword"/><input type="submit" value="Submit" id="sub"/></p>
-        </form>
-'''
-        if(error == 1):
-            html += '<div id="error">Unable to fetch TWitter API data. Please try again later.</div>'
-        elif(error == 2):
-            html += '<div id="error">Unrecognized Method of Classfication, please choose one from above.</div>'
-        html += '''
-    </div>
+    <form class="navbar-form navbar-right" name="keyform" method="get" onSubmit="return checkEmpty(this);">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search" name="keyword">
+            <div class="input-group-btn">
+                <button class="btn btn-default" type="submit">
+                    <i class="glyphicon glyphicon-search"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+  </div>
+</nav>
+
+<div class="container">
+    </br>
+    <h2>About the Project</h2>
+    <h3>
+        <p> This is a sentiment analyzer </p>
+        <p> Performing sentiment analysis on movie reviews, </p>
+        <p> the analyzer uses Naive-Bayes classifier technique</p>
+    </h3>
+    </br></br></br>
+    <h2>Usage</h2>
+    <h3>
+        <p> Enter the movie in the search bar and press enter </p>
+    </h3>
+</div>
+
     <script type="text/javascript">
     function checkEmpty(f) {
         if (f.keyword.value === "") {
@@ -68,29 +91,88 @@ class HTMLHelper:
     #end
 
     #start getResultHTML
-    def getResultHTML(self, keyword, results, pos_count, neg_count, neut_count):
+    def getResultHTML(self, keyword, results, pos_count, neg_count, neut_count, tweets):
         print("Fetched Result web page")
         keyword = urllib.unquote(keyword.replace("+", " "))
         html = '''
 <html>
 <head><title>SARS</title>
-    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.4.1/build/cssgrids/grids-min.css" />
-    <link rel="stylesheet" type="text/css" href="static/styles.css" />
+    <title>SARS</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <div class="yui3-g" id="doc">
-    <div class="yui3-u" id="hd">
-        <h2> Sentiment Analysis </h2>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="#">Sentiment Analysis</a>
     </div>
-    <div class="yui3-u" id="bd">
-        <form name="keyform" id="key-form" method="get" onSubmit="return checkEmpty(this);">
-        <p><input type="text" value="" name="keyword" id="keyword"/><input type="submit" value="Search" id="sub"/></p>
-        </form>
-        <div id="results">
+    <form class="navbar-form navbar-right" name="keyform" method="get" onSubmit="return checkEmpty(this);">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search" name="keyword">
+            <div class="input-group-btn">
+                <button class="btn btn-default" type="submit">
+                    <i class="glyphicon glyphicon-search"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+  </div>
+</nav>
+
+<div class="media" id="result-chart" style="width: 600px; height: 450px; float:right; margin:0 20px 20px 0;"></div>
+
+<div class="container">
+    <div class="media">
+        <div class="media-body">
+            <h4 class="media-heading"></h4>
+            <p></p>
+        </div>
+    </div>
+<hr>
+
+
 '''
         html += '''
-        <div id="result-chart" style="width: 600px; height: 450px;"></div>
-        </div>
+        <div class="media-body">
+        '''
+        #Printing tweets here
+        html += '''
+            <h4 class="media-heading">Positive Tweets</h4>
+            <hr>
+        '''
+        count = 0
+        for tweet in tweets:
+            if(tweet['sentiment'] == 'pos'):
+                html += '''<p>'''
+                html += tweet['text']
+                html += '''</p>'''
+                count = count + 1
+            if(count == 11):
+                break
+
+        html += '''
+            <br><hr>
+            <h4 class="media-heading">Negative Tweets</h4>
+            <hr>
+        '''
+
+        count = 0
+        for tweet in tweets:
+            if(tweet['sentiment'] == 'neg'):
+                html += '''<p>'''
+                html += tweet['text']
+                html += '''</p>'''
+                count = count + 1
+            if(count == 11):
+                break
+
+        html += '''
+            </div>
         <script type="text/javascript" src="https://www.google.com/jsapi"></script>
         <script type="text/javascript">
             google.load("visualization", "1", {packages:["corechart"]});
@@ -113,7 +195,7 @@ class HTMLHelper:
                 var chart = new google.visualization.PieChart(document.getElementById('result-chart'));
                 chart.draw(data, options);
             }
-            '''
+        '''
 
         html += '''
         function checkEmpty(f) {
