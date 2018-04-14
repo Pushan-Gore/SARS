@@ -1,5 +1,6 @@
 import json, web, html_helper, logging
 import sentiment_analysis
+import movie_reco
 
 urls = (
     '/', 'index'
@@ -24,11 +25,14 @@ class index:
                     keyword = item.split('=')[1]
 
             print "Query is " + str(keyword)
+            #reco_system = movie_reco.RecoSystem()
+            recommendations = movie_reco.show_recommendations(keyword)
+            print recommendations
 
             twitter_api = sentiment_analysis.TwitterClient()
             tweets = twitter_api.get_tweets(keyword, 200)
             if(tweets):
-                results = {}
+                results = recommendations
                 ptweets = [tweet for tweet in tweets if (tweet['sentiment'] == 'positive' or tweet['sentiment'] == 'pos')]
                 ntweets = [tweet for tweet in tweets if (tweet['sentiment'] == 'negative' or tweet['sentiment'] == 'neg')]
                 neut_count = 100*(len(tweets) - len(ntweets) - len(ptweets))/len(tweets)

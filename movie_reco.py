@@ -16,7 +16,7 @@ def movie_name():
 	    movie_id, movie_name = record[0], record[1]
 	    lookup[movie_id] = movie_name
 	return lookup
-	
+
 def ratings():
     '''
     Iterate the source file using a generator
@@ -24,8 +24,8 @@ def ratings():
     MovieRating = namedtuple('MovieRating', 'user_id, movie_id, rating, timestamp')
     for record in map(MovieRating._make, csv.reader(open('u.data', 'rb'), delimiter='\t')):
         yield record
-        
-        
+
+
 def users_ratings():
     '''
     Grouping the ratings per user, used as an input
@@ -34,13 +34,13 @@ def users_ratings():
     u = defaultdict(dict)
     for line in ratings():
         u[line.user_id][line.movie_id] = int(line.rating)
-    
+
     users = defaultdict(dict)
     for k, v in u.iteritems():
         users[k] = sorted(v.items())
     return users
-   
-    
+
+
 def coratings():
     '''
     For each user, create the pair of corated movies using combination,
@@ -60,12 +60,12 @@ def coratings():
             coratings[movie_pair]['rating2Sum'] += rating_pair[1]
             coratings[movie_pair]['ratingSqSum'] += pow(rating_pair[0], 2)
             coratings[movie_pair]['rating2SqSum'] += pow(rating_pair[1], 2)
-            coratings[movie_pair]['dotProductSum'] += rating_pair[0] * rating_pair[1]       
+            coratings[movie_pair]['dotProductSum'] += rating_pair[0] * rating_pair[1]
     return coratings
-    
+
 def recommendations(minimum_coratings=30):
     '''
-    Actually builds the dict with the correlation coeff. for each pair of movies, 
+    Actually builds the dict with the correlation coeff. for each pair of movies,
     given that there is a sufficient number of coratings
     '''
     rec = defaultdict(dict)
@@ -79,22 +79,25 @@ def recommendations(minimum_coratings=30):
             rec[movie_2][movie_1] = num/den
     return rec
 
-def show_recommendations(user_movie, top_n=10):
+def show_recommendations(keyword, top_n=10):
     '''
     Print the top n recommendations for each movie
     '''
+    recommended = []
     lu = movie_name()
     for movie, correlations in recommendations().iteritems():
-	if user_movie in lu[movie]:
+	if keyword in lu[movie]:
         	for i, related_movies in enumerate(sorted(correlations.items(), key=itemgetter(1), reverse=True)):
             		if i == top_n:
                 		print
                 		break
+                        recommended.append(lu[related_movies[0]])
 			#print lu[movie]
-            		print movie, lu[movie], i+1, related_movies[0], lu[related_movies[0]], related_movies[1]
-	
-            
+            		#print movie, lu[movie], i+1, related_movies[0], lu[related_movies[0]], related_movies[1]
+
+    return recommended
+
 
 if __name__ == '__main__':
 	user_movie = raw_input("Please enter: ")
-	show_recommendations(user_movie)   
+	print show_recommendations(user_movie)

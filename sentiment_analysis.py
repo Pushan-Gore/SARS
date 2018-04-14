@@ -31,7 +31,6 @@ class TwitterClient(object):
         self.classifier = pickle.load(classifier_file)
         self.html = html_helper.HTMLHelper()
 
-        self.results = {}
         self.neut_count = 0
         self.pos_count = 0
         self.neg_count = 0
@@ -108,7 +107,7 @@ class TwitterClient(object):
             self.frequency_list[str(item[0])] = int(item[1])
 
     def getHTML(self, keyword, results, pos_count, neg_count, neut_count, tweets, frequency_list):
-        return self.html.getResultHTML(keyword, self.results, self.pos_count, \
+        return self.html.getResultHTML(keyword, results, self.pos_count, \
                 self.neg_count, self.neut_count, tweets, frequency_list)
 
 def main():

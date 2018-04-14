@@ -241,14 +241,31 @@ sum to one:<br>
         '''
 
         html += '''
-<div class="media" id="result-chart" style="width: 600px; height: 450px; float:right; margin:0 20px 20px 0;"></div>
-
 <div class="container">
 <hr>
-        <div class="media-body">
         '''
+
+        #Printing recommendations
+        html += '''
+        <div class="media-body">
+            <b><h4 class="media-heading">Recommendations For You:</h4></b>
+            <hr>
+        '''
+
+        for i, reco in enumerate(results):
+            html += '''<p><b>''' + str(i + 1) + '''.</b> '''
+            html += str(reco)
+            html += '''</p>'''
+
+        html += '''
+            </div>
+            <hr>
+        <div class="media" id="result-chart" style="width: 600px; height: 450px; float:right; margin:0 20px 20px 0;"></div>
+        '''
+
         #Printing tweets here
         html += '''
+        <div class="media-body">
             <h4 class="media-heading">Positive Tweets</h4>
             <hr>
         '''
