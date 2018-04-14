@@ -24,6 +24,7 @@ class index:
                 if 'keyword' in item:
                     keyword = item.split('=')[1]
 
+            keyword = ' '.join(keyword.split('+'))
             print "Query is " + str(keyword)
             #reco_system = movie_reco.RecoSystem()
             recommendations = movie_reco.show_recommendations(keyword)
