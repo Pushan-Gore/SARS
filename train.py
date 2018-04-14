@@ -72,12 +72,12 @@ def train_set():
 	testSets[predicted].add(i)
 
     #prints metrics to show how well the feature selection did
-    print 'train on %d instances, test on %d instances' % (len(trainFeatures), len(testFeatures))
-    print 'accuracy:', nltk.classify.util.accuracy(test_classifier, testFeatures)
-    print 'pos precision:', precision(referenceSets['pos'], testSets['pos'])
-    print 'pos recall:', recall(referenceSets['pos'], testSets['pos'])
-    print 'neg precision:', precision(referenceSets['neg'], testSets['neg'])
-    print 'neg recall:', recall(referenceSets['neg'], testSets['neg'])
+    #print 'train on %d instances, test on %d instances' % (len(trainFeatures), len(testFeatures))
+    #print 'accuracy:', nltk.classify.util.accuracy(test_classifier, testFeatures)
+    #print 'pos precision:', precision(referenceSets['pos'], testSets['pos'])
+    #print 'pos recall:', recall(referenceSets['pos'], testSets['pos'])
+    #print 'neg precision:', precision(referenceSets['neg'], testSets['neg'])
+    #print 'neg recall:', recall(referenceSets['neg'], testSets['neg'])
 
     #prints metrics to show how well the feature selection did
     classifier.show_most_informative_features(10)
